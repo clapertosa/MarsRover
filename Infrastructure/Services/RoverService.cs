@@ -41,7 +41,7 @@ namespace Infrastructure.Services
 
         public static Rover GetNewRoverPosition(Planet planet, Rover rover, char direction)
         {
-            int planetSize = planet.Rows;
+            int planetSize = planet.Size;
             Coordinates roverCoordinates = new Coordinates() {PosX = rover.PosX, PosY = rover.PosY};
 
             switch (direction)

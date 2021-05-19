@@ -30,7 +30,7 @@ const TableColumn = styled.td`
   height: ${() => `${CELL_SIZE}px`};
 `;
 
-const Grid = ({ size, pos }) => {
+const Grid = ({ size, pos, direction }) => {
   const updateRoverPosition = () => {};
 
   useEffect(() => {

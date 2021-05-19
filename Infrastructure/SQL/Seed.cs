@@ -13,7 +13,7 @@ namespace Infrastructure.SQL
 
         public static void InitializeDatabase(string connectionString)
         {
-            int planetSize = _random.Next(3, 5);
+            int planetSize = _random.Next(10, 12);
             using SqliteConnection connection = new SqliteConnection(connectionString);
             connection.Open();
 
@@ -50,8 +50,7 @@ namespace Infrastructure.SQL
             string insertPlanetSqlCmd = File.ReadAllText("../Infrastructure/SQL/Queries/Planet/InsertPlanet.sql");
             SqliteCommand insertPlanet = new SqliteCommand(insertPlanetSqlCmd, connection);
             insertPlanet.Parameters.AddWithValue("$name", "Mars");
-            insertPlanet.Parameters.AddWithValue("$rows", planetSize);
-            insertPlanet.Parameters.AddWithValue("$columns", planetSize);
+            insertPlanet.Parameters.AddWithValue("$size", planetSize);
             SqliteDataReader insertPlanetReader = insertPlanet.ExecuteReader();
             insertPlanetReader.Read();
 
@@ -59,8 +58,7 @@ namespace Infrastructure.SQL
             {
                 Id = insertPlanetReader.GetInt32(0),
                 Name = insertPlanetReader.GetString(1),
-                Rows = insertPlanetReader.GetInt16(2),
-                Columns = insertPlanetReader.GetInt16(3),
+                Size = insertPlanetReader.GetInt16(2)
             };
 
             // Insert rover

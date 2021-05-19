@@ -21,6 +21,5 @@ CREATE TABLE 'Planet'
 (
     Id      INTEGER PRIMARY KEY,
     Name    NVARCHAR(100) NOT NULL,
-    Rows    SMALLINT      NOT NULL,
-    Columns SMALLINT      NOT NULL
+    Size    SMALLINT      NOT NULL
 );

@@ -1,2 +1,2 @@
-﻿SELECT Id, Name, Rows, Columns
+﻿SELECT Id, Name, Size
 FROM Planet;

@@ -40,8 +40,7 @@ namespace Infrastructure.Repositories
                 {
                     Id = reader.GetInt32(0),
                     Name = reader.GetString(1),
-                    Rows = reader.GetInt16(2),
-                    Columns = reader.GetInt16(3)
+                    Size = reader.GetInt16(2)
                 });
             }
 
@@ -80,8 +79,7 @@ namespace Infrastructure.Repositories
             {
                 Id = reader.GetInt32(0),
                 Name = reader.GetString(1),
-                Rows =  reader.GetInt16(2),
-                Columns =  reader.GetInt16(3),
+                Size = reader.GetInt16(2),
             };
 
             return planet;
