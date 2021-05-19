@@ -13,7 +13,7 @@ namespace Infrastructure.SQL
 
         public static void InitializeDatabase(string connectionString)
         {
-            ushort planetSize = (ushort) _random.Next(0, 5);
+            int planetSize = _random.Next(3, 5);
             using SqliteConnection connection = new SqliteConnection(connectionString);
             connection.Open();
 
@@ -25,11 +25,11 @@ namespace Infrastructure.SQL
             List<Obstacle> obstacles = new List<Obstacle>();
             string insertObstaclesSqlCmd =
                 File.ReadAllText("../Infrastructure/SQL/Queries/Obstacle/InsertObstacles.sql");
-            for (short i = 0; i < planetSize; i++)
+            for (short i = 0; i < planetSize / 2; i++)
             {
                 SqliteCommand insertObstacle = new SqliteCommand(insertObstaclesSqlCmd, connection);
-                ushort randomPosX = (ushort) _random.Next(0, planetSize);
-                ushort randomPosY = (ushort) _random.Next(0, planetSize);
+                int randomPosX = _random.Next(0, planetSize);
+                int randomPosY = _random.Next(0, planetSize);
                 insertObstacle.Parameters.Add(new SqliteParameter
                     {ParameterName = "$posX", SqliteType = SqliteType.Integer, Value = randomPosX});
                 insertObstacle.Parameters.Add(new SqliteParameter
@@ -40,20 +40,37 @@ namespace Infrastructure.SQL
                 {
                     obstacles.Add(new Obstacle
                     {
-                        Id = obstacleReader.GetInt32(0), PosX = (ushort) obstacleReader.GetInt16(1),
-                        PosY = (ushort) obstacleReader.GetInt16(2)
+                        Id = obstacleReader.GetInt32(0), PosX = obstacleReader.GetInt16(1),
+                        PosY = obstacleReader.GetInt16(2)
                     });
                 }
             }
 
+            // Insert Planet Mars
+            string insertPlanetSqlCmd = File.ReadAllText("../Infrastructure/SQL/Queries/Planet/InsertPlanet.sql");
+            SqliteCommand insertPlanet = new SqliteCommand(insertPlanetSqlCmd, connection);
+            insertPlanet.Parameters.AddWithValue("$name", "Mars");
+            insertPlanet.Parameters.AddWithValue("$rows", planetSize);
+            insertPlanet.Parameters.AddWithValue("$columns", planetSize);
+            SqliteDataReader insertPlanetReader = insertPlanet.ExecuteReader();
+            insertPlanetReader.Read();
+
+            Planet planet = new Planet
+            {
+                Id = insertPlanetReader.GetInt32(0),
+                Name = insertPlanetReader.GetString(1),
+                Rows = insertPlanetReader.GetInt16(2),
+                Columns = insertPlanetReader.GetInt16(3),
+            };
+
             // Insert rover
             Rover rover = new Rover();
-            ushort randomRoverPosX = (ushort) _random.Next(0, planetSize);
-            ushort randomRoverPosY = (ushort) _random.Next(0, planetSize);
+            int randomRoverPosX = _random.Next(0, planetSize);
+            int randomRoverPosY = _random.Next(0, planetSize);
 
             while (obstacles.Select(x => x.PosY).Contains(randomRoverPosY))
             {
-                randomRoverPosY = (ushort) _random.Next(0, planetSize);
+                randomRoverPosY = _random.Next(0, planetSize);
             }
 
             string insertRoverSqlCmd = File.ReadAllText("../Infrastructure/SQL/Queries/Rover/InsertRover.sql");
@@ -64,6 +81,8 @@ namespace Infrastructure.SQL
                 {ParameterName = "$posY", SqliteType = SqliteType.Integer, Value = randomRoverPosY});
             insertRover.Parameters.Add(new SqliteParameter
                 {ParameterName = "$direction", SqliteType = SqliteType.Text, Value = 'E'});
+            insertRover.Parameters.Add(new SqliteParameter
+                {ParameterName = "$planetId", SqliteType = SqliteType.Integer, Value = planet.Id});
 
             SqliteDataReader roverReader = insertRover.ExecuteReader();
 
@@ -72,20 +91,11 @@ namespace Infrastructure.SQL
                 rover = new Rover
                 {
                     Id = roverReader.GetInt32(0),
-                    PosX = (ushort) roverReader.GetInt16(1),
-                    PosY = (ushort) roverReader.GetInt16(2),
+                    PosX = roverReader.GetInt16(1),
+                    PosY = roverReader.GetInt16(2),
                     Direction = roverReader.GetChar(3)
                 };
             }
-
-            // Insert Planet Mars
-            string insertPlanetSqlCmd = File.ReadAllText("../Infrastructure/SQL/Queries/Planets/InsertPlanet.sql");
-            SqliteCommand insertPlanet = new SqliteCommand(insertPlanetSqlCmd, connection);
-            insertPlanet.Parameters.AddWithValue("$name", "Mars");
-            insertPlanet.Parameters.AddWithValue("$rows", planetSize);
-            insertPlanet.Parameters.AddWithValue("$columns", planetSize);
-            insertPlanet.Parameters.AddWithValue("$roverId", rover.Id);
-            insertPlanet.ExecuteNonQuery();
         }
     }
 }

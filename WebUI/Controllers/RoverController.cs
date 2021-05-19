@@ -15,9 +15,21 @@ namespace WebUI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<Rover>> GetRoverInfo(string id)
+        public async Task<ActionResult<Rover>> GetRoverInfo(int id)
         {
-            return Ok(await _roverRepository.GetRoverInfoAsync());
+            return Ok(await _roverRepository.GetRoverInfoAsync(id));
+        }
+
+        [HttpPut("move")]
+        public async Task<ActionResult<Rover>> Move([FromForm] int id, [FromForm] char direction)
+        {
+            return Ok(await _roverRepository.MoveAsync(id, direction));
+        }
+
+        [HttpPut("change-direction")]
+        public async Task<ActionResult<Rover>> ChangeDirection([FromForm] int id, [FromForm] char direction)
+        {
+            return Ok(await _roverRepository.ChangeDirectionAsync(id, direction));
         }
     }
 }

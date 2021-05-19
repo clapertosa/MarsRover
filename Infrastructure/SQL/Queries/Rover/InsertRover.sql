@@ -1,5 +1,5 @@
-﻿INSERT INTO 'Rover'(Posx, PosY, Direction)
-VALUES ($posX, $posY, $direction);
-SELECT *
+﻿INSERT INTO 'Rover'(Posx, PosY, Direction, PlanetId)
+VALUES ($posX, $posY, $direction, $planetId);
+SELECT Id, PosX, PosY, Direction, PlanetId
 FROM 'Rover'
 WHERE Id = last_insert_rowid();

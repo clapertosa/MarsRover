@@ -8,6 +8,7 @@ namespace Infrastructure
     {
         public static void AddInfrastructure(this IServiceCollection services)
         {
+            services.AddScoped<IPlanetRepository, PlanetRepository>();
             services.AddScoped<IRoverRepository, RoverRepository>();
             services.AddScoped<IObstacleRepository, ObstacleRepository>();
         }
