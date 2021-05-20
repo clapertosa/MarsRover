@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Parameters.Rover;
@@ -21,16 +22,17 @@ namespace WebUI.Controllers
             return Ok(await _roverRepository.GetRoverInfoAsync(id));
         }
 
+        [HttpGet("all")]
+        public async Task<ActionResult<IEnumerable<Rover>>> GetAll()
+        {
+            return Ok(await _roverRepository.GetAllRovers());
+        }
+
         [HttpPut("move")]
         public async Task<ActionResult<Rover>> Move([FromBody] MoveParams roverParams)
         {
-            return Ok(await _roverRepository.MoveAsync(roverParams.Id, roverParams.Direction));
+            return Ok(await _roverRepository.MoveAsync(roverParams));
         }
-
-        [HttpPut("change-direction")]
-        public async Task<ActionResult<Rover>> ChangeDirection([FromBody] ChangeDirectionParams roverParams)
-        {
-            return Ok(await _roverRepository.ChangeDirectionAsync(roverParams.Id, roverParams.Direction));
-        }
+        
     }
 }

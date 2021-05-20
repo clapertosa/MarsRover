@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import axiosInstance from "./axiosInstance";
 import Grid from "./components/Grid/Grid";
+import cardinalPoint from "./constants/cardinalPoint";
+import direction from "./constants/direction";
 
 const Container = styled.div`
   display: flex;
@@ -16,64 +18,97 @@ const Container = styled.div`
 
 const Dropdown = styled.select``;
 
+const ObstacleError = styled.span`
+  color: red;
+`;
+
 const App = () => {
   const [planets, setPlanets] = useState([]);
   const [currentPlanet, setCurrentPlanet] = useState(null);
   const [obstacles, setObstacles] = useState([]);
-  const [rover, setRover] = useState({ posX: 0, posY: 0 });
+  const [rover, setRover] = useState({
+    posX: 0,
+    posY: 0,
+    direction: cardinalPoint.EAST,
+  });
+  const [instructions, setInstructions] = useState([]);
+  const [obstacle, setObstacle] = useState({
+    posX: 0,
+    posY: 0,
+    message: "",
+  });
   const [loading, setLoading] = useState(false);
 
-  const initialize = () => {
-    // Get Planets
-    axiosInstance
-      .get("/planet/all")
-      .then(({ data }) => {
+  const initialize = async () => {
+    try {
+      setLoading(true);
+      // Get Planets
+      await axiosInstance.get("/planet/all").then(({ data }) => {
         setPlanets([...data]);
         setCurrentPlanet(data?.[0]);
-      })
-      .catch(() => {});
+      });
 
-    // Get Obstacles
-    axiosInstance
-      .get("/obstacle/all")
-      .then(({ data }) => setObstacles([...data]))
-      .catch(() => {});
+      // Get Obstacles
+      await axiosInstance
+        .get("/obstacle/all")
+        .then(({ data }) => setObstacles([...data]))
+        .catch(() => {});
 
-    axiosInstance
-      .get(`/rover?id=1`)
-      .then(({ data }) => setRover((prev) => ({ ...prev, ...data })))
-      .catch(() => {});
+      // Get Rovers
+      await axiosInstance
+        .get(`/rover/all`)
+        .then(({ data }) => {
+          setRover(data[0]);
+        })
+        .catch(() => {});
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
   };
 
-  const moveRover = (direction) => {
+  const moveRover = () => {
     setLoading(true);
     axiosInstance
-      .put("/rover/move", { id: rover?.id, direction })
+      .put("/rover/move", {
+        id: rover?.id,
+        instructions: instructions.map((instruction) => instruction.value),
+      })
       .then(({ data }) => {
         setRover((prev) => ({ ...prev, ...data }));
         setLoading(false);
+        setInstructions([]);
       })
-      .catch(() => {
+      .catch(({ response: { data } }) => {
+        setInstructions([]);
         setLoading(false);
+        const obstaclePosX = data?.obstacle?.PosX;
+        const obstaclePosY = data?.obstacle?.PosY;
+        setObstacle({
+          posX: obstaclePosX,
+          posY: obstaclePosY,
+          message: `Obstacle at PosX ${obstaclePosX} and PosY ${obstaclePosY}`,
+        });
+        setRover((prev) => ({
+          ...prev,
+          posX: data?.rover?.PosX,
+          posY: data?.rover?.PosY,
+          direction: data?.rover?.Direction,
+        }));
       });
   };
 
-  const changeRoverDirection = (direction) => {
-    setLoading(true);
-    axiosInstance
-      .put("/rover/change-direction", { id: rover?.id, direction })
-      .then(({ data }) => {
-        setRover((prev) => ({ ...prev, ...data }));
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
+  const updateInstructions = (value) => {
+    setInstructions((prev) => [...prev, value]);
   };
 
   useEffect(() => {
     initialize();
   }, []);
+
+  useEffect(() => {
+    setObstacle((prev) => ({ ...prev, message: "" }));
+  }, [instructions]);
 
   return (
     <Container>
@@ -89,6 +124,7 @@ const App = () => {
         size={currentPlanet?.size ?? 0}
         rover={rover}
         obstacles={obstacles}
+        obstacle={obstacle}
       ></Grid>
 
       <div style={{ display: "flex", alignItems: "center" }}>
@@ -96,7 +132,7 @@ const App = () => {
           type="button"
           disabled={loading}
           style={{ marginRight: 5 }}
-          onClick={() => changeRoverDirection("l")}
+          onClick={() => updateInstructions(direction.LEFT)}
         >
           turn left
         </button>
@@ -110,14 +146,14 @@ const App = () => {
           <button
             type="button"
             disabled={loading}
-            onClick={() => moveRover("f")}
+            onClick={() => updateInstructions(direction.FORWARD)}
           >
             forward
           </button>
           <button
             type="button"
             disabled={loading}
-            onClick={() => moveRover("b")}
+            onClick={() => updateInstructions(direction.BACKWARD)}
           >
             backward
           </button>
@@ -126,10 +162,25 @@ const App = () => {
           type="button"
           disabled={loading}
           style={{ marginLeft: 5 }}
-          onClick={() => changeRoverDirection("r")}
+          onClick={() => updateInstructions(direction.RIGHT)}
         >
           turn right
         </button>
+      </div>
+      <div style={{ marginTop: 10, marginBottom: 10 }}>
+        <button
+          type="button"
+          disabled={instructions.length <= 0}
+          onClick={() => moveRover()}
+        >
+          Move
+        </button>
+      </div>
+      <ObstacleError>{obstacle?.message}</ObstacleError>
+      <div>
+        <span>
+          {instructions.map((instruction) => instruction.label).join(", ")}
+        </span>
       </div>
     </Container>
   );

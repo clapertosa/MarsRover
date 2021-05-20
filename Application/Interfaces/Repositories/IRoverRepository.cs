@@ -1,10 +1,17 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Domain.Entities;
+using Domain.Parameters.Rover;
 
 namespace Application.Interfaces.Repositories
 {
     public interface IRoverRepository
     {
+        /// <summary>
+        /// Returns all rovers
+        /// </summary>
+        Task<IEnumerable<Rover>> GetAllRovers();
+
         /// <summary>
         /// Get rover's info
         /// </summary>
@@ -15,17 +22,8 @@ namespace Application.Interfaces.Repositories
         /// <summary>
         /// Moves Rover Forward (f) or Backward (b)
         /// </summary>
-        /// <param name="id">Rover's id</param>
-        /// <param name="direction">Char of type 'f' or 'b'</param>
+        /// <param name="moveParams">Rover's id and an array of chars 'f', 'b', 'l' and 'r'</param>
         /// <returns>Rover's position and direction</returns>
-        Task<Rover> MoveAsync(int id, char direction);
-
-        /// <summary>
-        /// Turns Rover Left (l) or Right(r)
-        /// </summary>
-        /// /// <param name="id">Rover's id</param>
-        /// <param name="direction">Char of type 'l' or 'r'</param>
-        /// <returns>Rover's position and direction</returns>
-        Task<Rover> ChangeDirectionAsync(int id, char direction);
+        Task<Rover> MoveAsync(MoveParams moveParams);
     }
 }

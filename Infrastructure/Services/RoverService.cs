@@ -9,6 +9,7 @@ namespace Infrastructure.Services
         {
             public int PosX { get; set; }
             public int PosY { get; set; }
+            public char Direction { get; set; }
         }
 
         private static Coordinates CalculateCoordinates(Rover rover, int direction, int planetSize)
@@ -39,41 +40,7 @@ namespace Infrastructure.Services
             return coordinates;
         }
 
-        public static Rover GetNewRoverPosition(Planet planet, Rover rover, char direction)
-        {
-            Rover newRover = new Rover
-            {
-                Id = rover.Id,
-                PosX = rover.PosX,
-                PosY = rover.PosY,
-                Direction = rover.Direction,
-                PlanetId = rover.PlanetId
-            };
-            int planetSize = planet.Size;
-            Coordinates roverCoordinates = new Coordinates() {PosX = newRover.PosX, PosY = newRover.PosY};
-
-            switch (direction)
-            {
-                case RoverDirections.Forward:
-                {
-                    roverCoordinates = CalculateCoordinates(newRover, 1, planetSize);
-                    break;
-                }
-                case RoverDirections.Backward:
-                {
-                    roverCoordinates = CalculateCoordinates(newRover, -1, planetSize);
-                    break;
-                }
-                default: return newRover;
-            }
-
-            newRover.PosX = roverCoordinates.PosX;
-            newRover.PosY = roverCoordinates.PosY;
-
-            return newRover;
-        }
-
-        public static char GetNewRoverDirection(Rover rover, char turn)
+        private static char GetNewRoverDirection(Rover rover, char turn)
         {
             switch (turn)
             {
@@ -96,6 +63,58 @@ namespace Infrastructure.Services
             }
 
             return rover.Direction;
+        }
+
+        public static Rover GetNewRoverPosition(Planet planet, Rover rover, char direction)
+        {
+            Rover newRover = new Rover
+            {
+                Id = rover.Id,
+                PosX = rover.PosX,
+                PosY = rover.PosY,
+                Direction = rover.Direction,
+                PlanetId = rover.PlanetId
+            };
+            int planetSize = planet.Size;
+            Coordinates roverCoordinates = new Coordinates()
+                {PosX = newRover.PosX, PosY = newRover.PosY, Direction = newRover.Direction};
+
+            switch (direction)
+            {
+                case RoverDirections.Forward:
+                {
+                    roverCoordinates = CalculateCoordinates(newRover, 1, planetSize);
+                    roverCoordinates.Direction = newRover.Direction;
+                    break;
+                }
+                case RoverDirections.Backward:
+                {
+                    roverCoordinates = CalculateCoordinates(newRover, -1, planetSize);
+                    roverCoordinates.Direction = newRover.Direction;
+                    break;
+                }
+                case RoverDirections.Left:
+                {
+                    roverCoordinates.PosX = newRover.PosX;
+                    roverCoordinates.PosY = newRover.PosY;
+                    roverCoordinates.Direction = GetNewRoverDirection(newRover, direction);
+                }
+                    break;
+                case RoverDirections.Right:
+                {
+                    roverCoordinates.PosX = newRover.PosX;
+                    roverCoordinates.PosY = newRover.PosY;
+                    roverCoordinates.Direction = GetNewRoverDirection(newRover, direction);
+                }
+                    break;
+                default: return newRover;
+            }
+
+            newRover.PosX = roverCoordinates.PosX;
+            newRover.PosY = roverCoordinates.PosY;
+            newRover.Direction = roverCoordinates.Direction;
+
+            return newRover;
         }
     }
 }

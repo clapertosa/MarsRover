@@ -1,4 +1,7 @@
+// eslint-disable-next-line
 export default {
-  BACK: 0,
-  FORWARD: 1,
+  FORWARD: { label: "Forward", value: "f" },
+  BACKWARD: { label: "Backward", value: "b" },
+  LEFT: { label: "Left", value: "l" },
+  RIGHT: { label: "Right", value: "r" },
 };
