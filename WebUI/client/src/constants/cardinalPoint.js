@@ -1,6 +1,7 @@
+// eslint-disable-next-line
 export default {
-  N: 0,
-  S: 1,
-  E: 2,
-  W: 3,
+  N: "N",
+  S: "S",
+  E: "E",
+  W: "W",
 };

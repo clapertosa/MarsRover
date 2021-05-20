@@ -10,7 +10,13 @@ namespace WebUI
             services.AddCors(options =>
             {
                 options.AddPolicy(corsPolicy,
-                    builder => { builder.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowCredentials(); });
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:3000")
+                            .AllowAnyHeader()
+                            .AllowCredentials()
+                            .AllowAnyMethod();
+                    });
             });
         }
     }

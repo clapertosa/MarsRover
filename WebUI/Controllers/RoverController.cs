@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Domain.Parameters.Rover;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebUI.Controllers
@@ -21,15 +22,15 @@ namespace WebUI.Controllers
         }
 
         [HttpPut("move")]
-        public async Task<ActionResult<Rover>> Move([FromForm] int id, [FromForm] char direction)
+        public async Task<ActionResult<Rover>> Move([FromBody] MoveParams roverParams)
         {
-            return Ok(await _roverRepository.MoveAsync(id, direction));
+            return Ok(await _roverRepository.MoveAsync(roverParams.Id, roverParams.Direction));
         }
 
         [HttpPut("change-direction")]
-        public async Task<ActionResult<Rover>> ChangeDirection([FromForm] int id, [FromForm] char direction)
+        public async Task<ActionResult<Rover>> ChangeDirection([FromBody] ChangeDirectionParams roverParams)
         {
-            return Ok(await _roverRepository.ChangeDirectionAsync(id, direction));
+            return Ok(await _roverRepository.ChangeDirectionAsync(roverParams.Id, roverParams.Direction));
         }
     }
 }

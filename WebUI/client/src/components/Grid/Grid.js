@@ -1,10 +1,18 @@
-import React, { useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
 import { ReactComponent as RoverImage } from "../../assets/images/rover.svg";
+import { ReactComponent as RockImage } from "../../assets/images/rock.svg";
 import { CELL_SIZE, ROVER_SIZE_OFFSET } from "../../constants/grid";
+import cardinalPoint from "../../constants/cardinalPoint";
 
 const Container = styled.div`
   position: relative;
+  margin: 10px 0px;
+
+  svg {
+    width: ${() => CELL_SIZE - ROVER_SIZE_OFFSET + "px"};
+    height: ${() => CELL_SIZE - ROVER_SIZE_OFFSET + "px"};
+  }
 `;
 
 const Table = styled.table`
@@ -30,12 +38,21 @@ const TableColumn = styled.td`
   height: ${() => `${CELL_SIZE}px`};
 `;
 
-const Grid = ({ size, pos, direction }) => {
-  const updateRoverPosition = () => {};
-
-  useEffect(() => {
-    updateRoverPosition();
-  }, [pos]);
+const Grid = ({ size, rover, obstacles }) => {
+  const getRoverRotation = () => {
+    switch (rover.direction) {
+      case cardinalPoint.N:
+        return -90;
+      case cardinalPoint.E:
+        return 0;
+      case cardinalPoint.S:
+        return 90;
+      case cardinalPoint.W:
+        return 180;
+      default:
+        return 0;
+    }
+  };
 
   const getColumns = (rowId) => {
     const columns = [];
@@ -63,12 +80,27 @@ const Grid = ({ size, pos, direction }) => {
         <RoverImage
           style={{
             position: "absolute",
-            width: CELL_SIZE - ROVER_SIZE_OFFSET,
-            height: CELL_SIZE - ROVER_SIZE_OFFSET,
-            top: CELL_SIZE * pos.y + ROVER_SIZE_OFFSET / 2 + pos.y,
-            left: CELL_SIZE * pos.x + ROVER_SIZE_OFFSET / 2 + pos.x,
+            top: CELL_SIZE * rover?.posY + ROVER_SIZE_OFFSET / 2 + rover?.posY,
+            left: CELL_SIZE * rover?.posX + ROVER_SIZE_OFFSET / 2 + rover?.posX,
+            transform: `rotateZ(${getRoverRotation()}deg)`,
           }}
         ></RoverImage>
+        {obstacles?.map((obstacle) => (
+          <RockImage
+            key={obstacle.id}
+            style={{
+              position: "absolute",
+              top:
+                CELL_SIZE * obstacle?.posY +
+                ROVER_SIZE_OFFSET / 2 +
+                obstacle?.posY,
+              left:
+                CELL_SIZE * obstacle?.posX +
+                ROVER_SIZE_OFFSET / 2 +
+                obstacle?.posX,
+            }}
+          ></RockImage>
+        ))}
       </Container>
     );
   };

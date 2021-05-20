@@ -2,44 +2,77 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import axiosInstance from "./axiosInstance";
 import Grid from "./components/Grid/Grid";
-import cardinalPoint from "./constants/cardinalPoint";
 
 const Container = styled.div`
   display: flex;
   flex-flow: column;
+  align-items: center;
+
+  button {
+    height: 100%;
+    text-transform: capitalize;
+  }
 `;
 
-const Dropdown = styled.select`
-  margin-bottom: 10px;
-`;
+const Dropdown = styled.select``;
 
 const App = () => {
   const [planets, setPlanets] = useState([]);
   const [currentPlanet, setCurrentPlanet] = useState(null);
   const [obstacles, setObstacles] = useState([]);
-  const [roverPos, setRoverPos] = useState({ x: 0, y: 0 });
-  const [roverDirection, setRoverDirection] = useState(cardinalPoint.E);
+  const [rover, setRover] = useState({ posX: 0, posY: 0 });
+  const [loading, setLoading] = useState(false);
 
-  const getAllPlanets = () => {
+  const initialize = () => {
+    // Get Planets
     axiosInstance
-      .get("https://localhost:5001/api/planet/all")
-      .then((res) => {
-        setPlanets([...res.data]);
-        setCurrentPlanet(res.data?.[0]);
+      .get("/planet/all")
+      .then(({ data }) => {
+        setPlanets([...data]);
+        setCurrentPlanet(data?.[0]);
       })
       .catch(() => {});
-  };
 
-  const getAllObstacles = () => {
+    // Get Obstacles
     axiosInstance
-      .get("https://localhost:5001/api/obstacle/all")
-      .then((res) => setObstacles([...res.data]))
+      .get("/obstacle/all")
+      .then(({ data }) => setObstacles([...data]))
+      .catch(() => {});
+
+    axiosInstance
+      .get(`/rover?id=1`)
+      .then(({ data }) => setRover((prev) => ({ ...prev, ...data })))
       .catch(() => {});
   };
-  console.log(obstacles);
+
+  const moveRover = (direction) => {
+    setLoading(true);
+    axiosInstance
+      .put("/rover/move", { id: rover?.id, direction })
+      .then(({ data }) => {
+        setRover((prev) => ({ ...prev, ...data }));
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  };
+
+  const changeRoverDirection = (direction) => {
+    setLoading(true);
+    axiosInstance
+      .put("/rover/change-direction", { id: rover?.id, direction })
+      .then(({ data }) => {
+        setRover((prev) => ({ ...prev, ...data }));
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
-    getAllPlanets();
-    getAllObstacles();
+    initialize();
   }, []);
 
   return (
@@ -54,9 +87,50 @@ const App = () => {
       </Dropdown>
       <Grid
         size={currentPlanet?.size ?? 0}
-        pos={roverPos}
-        direction={roverDirection}
+        rover={rover}
+        obstacles={obstacles}
       ></Grid>
+
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <button
+          type="button"
+          disabled={loading}
+          style={{ marginRight: 5 }}
+          onClick={() => changeRoverDirection("l")}
+        >
+          turn left
+        </button>
+        <div
+          style={{
+            display: "flex",
+            flexFlow: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => moveRover("f")}
+          >
+            forward
+          </button>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => moveRover("b")}
+          >
+            backward
+          </button>
+        </div>
+        <button
+          type="button"
+          disabled={loading}
+          style={{ marginLeft: 5 }}
+          onClick={() => changeRoverDirection("r")}
+        >
+          turn right
+        </button>
+      </div>
     </Container>
   );
 };

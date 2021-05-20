@@ -15,11 +15,14 @@ namespace Infrastructure.Repositories
     {
         private readonly IConfiguration _configuration;
         private readonly IPlanetRepository _planetRepository;
+        private readonly IObstacleRepository _obstacleRepository;
 
-        public RoverRepository(IConfiguration configuration, IPlanetRepository planetRepository)
+        public RoverRepository(IConfiguration configuration, IPlanetRepository planetRepository,
+            IObstacleRepository obstacleRepository)
         {
             _configuration = configuration;
             _planetRepository = planetRepository;
+            _obstacleRepository = obstacleRepository;
         }
 
         public async Task<Rover> GetRoverInfoAsync(int id)
@@ -53,7 +56,8 @@ namespace Infrastructure.Repositories
                     Id = reader.GetInt32(0),
                     PosX = reader.GetInt16(1),
                     PosY = reader.GetInt16(2),
-                    Direction = reader.GetChar(3)
+                    Direction = reader.GetChar(3),
+                    PlanetId = reader.GetInt32(4)
                 };
             }
 
@@ -102,7 +106,13 @@ namespace Infrastructure.Repositories
 
             // Get Planet
             Planet planet = await _planetRepository.GetPlanetInfoAsync(rover.PlanetId);
+
             Rover newRover = RoverService.GetNewRoverPosition(planet, rover, formattedDirection);
+
+            // Check if there is an obstacle
+            bool positionHasObstacle = await _obstacleRepository.PositionHasObstacle(newRover.PosX, newRover.PosY);
+
+            if (positionHasObstacle) return rover;
 
             SqliteCommand updateRoverPositionCmd = new SqliteCommand
             {
