@@ -23,7 +23,8 @@ namespace Infrastructure.Repositories
         {
             List<Planet> planets = new List<Planet>();
 
-            await using SqliteConnection connection = new SqliteConnection(_configuration["ConnectionString"]);
+            await using SqliteConnection connection =
+                new SqliteConnection(_configuration.GetSection("ConnectionStrings:Database").Value);
             await connection.OpenAsync();
 
             SqliteCommand cmd = new SqliteCommand
@@ -51,7 +52,8 @@ namespace Infrastructure.Repositories
         {
             Planet planet = new Planet();
 
-            await using SqliteConnection connection = new SqliteConnection(_configuration["ConnectionString"]);
+            await using SqliteConnection connection =
+                new SqliteConnection(_configuration.GetSection("ConnectionStrings:Database").Value);
             await connection.OpenAsync();
 
             SqliteCommand cmd = new SqliteCommand

@@ -20,7 +20,8 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Obstacle>> GetAllObstaclesAsync()
         {
             List<Obstacle> obstacles = new List<Obstacle>();
-            await using SqliteConnection connection = new SqliteConnection(_configuration["ConnectionString"]);
+            await using SqliteConnection connection =
+                new SqliteConnection(_configuration.GetSection("ConnectionStrings:Database").Value);
             await connection.OpenAsync();
 
             string sqlCmdString =
@@ -41,7 +42,8 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> PositionHasObstacle(int posX, int posY)
         {
-            await using SqliteConnection connection = new SqliteConnection(_configuration["ConnectionString"]);
+            await using SqliteConnection connection =
+                new SqliteConnection(_configuration.GetSection("ConnectionStrings:Database").Value);
             await connection.OpenAsync();
             SqliteCommand cmd = new SqliteCommand
             {

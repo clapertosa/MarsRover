@@ -14,8 +14,9 @@ namespace WebUI
             using (var scope = host.Services.CreateScope())
             {
                 var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                Seed.InitializeDatabase(configuration["ConnectionString"]);
+                Seed.InitializeDatabase(configuration.GetSection("ConnectionStrings:Database").Value);
             }
+
             host.Run();
         }
 

@@ -31,7 +31,8 @@ namespace Infrastructure.Repositories
         {
             List<Rover> rovers = new List<Rover>();
 
-            await using SqliteConnection connection = new SqliteConnection(_configuration["ConnectionString"]);
+            await using SqliteConnection connection =
+                new SqliteConnection(_configuration.GetSection("ConnectionStrings:Database").Value);
             await connection.OpenAsync();
             SqliteCommand cmd = new SqliteCommand
             {
@@ -58,7 +59,8 @@ namespace Infrastructure.Repositories
         public async Task<Rover> GetRoverInfoAsync(int id)
         {
             Rover rover = null;
-            await using SqliteConnection connection = new SqliteConnection(_configuration["ConnectionString"]);
+            await using SqliteConnection connection =
+                new SqliteConnection(_configuration.GetSection("ConnectionStrings:Database").Value);
             await connection.OpenAsync();
             SqliteCommand cmd = new SqliteCommand
             {
@@ -102,7 +104,8 @@ namespace Infrastructure.Repositories
                 throw new RestException(HttpStatusCode.NotFound,
                     new {message = $"Rover with id {moveParams.Id} not found."});
 
-            await using SqliteConnection connection = new SqliteConnection(_configuration["ConnectionString"]);
+            await using SqliteConnection connection =
+                new SqliteConnection(_configuration.GetSection("ConnectionStrings:Database").Value);
             await connection.OpenAsync();
 
             // Get Planet
