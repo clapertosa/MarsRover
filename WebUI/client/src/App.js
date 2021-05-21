@@ -177,7 +177,7 @@ const App = () => {
         </button>
       </div>
       <ObstacleError>{obstacle?.message}</ObstacleError>
-      <div>
+      <div style={{ maxWidth: "50%" }}>
         <span>
           {instructions.map((instruction) => instruction.label).join(", ")}
         </span>
